@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class Answer {
+public class Answer implements Register {
     // Attributes
     protected int idAnswer;
     protected int idQuestion;
@@ -22,16 +22,24 @@ public class Answer {
         this.creation = -1;
         this.grade = -1;
         this.answer = "";
-        this.active = false;
+        this.active = true;
     }
 
-    public Answer(int idQuestion, int idUser, long creation, short grade, String answer) {
+    public Answer(int idQuestion, int idUser, long creation, String answer) {
         this.idQuestion = idQuestion;
         this.idUser = idUser;
         this.creation = creation;
-        this.grade = grade;
+        this.grade = 0;
         this.answer = answer;
-        this.active = false;
+        this.active = true;
+    }
+
+    public void setID(int id) {
+        
+    }
+
+    public int getID() {
+        return -1;
     }
 
     public int getIDAnswer() {

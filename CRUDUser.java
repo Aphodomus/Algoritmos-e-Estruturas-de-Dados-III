@@ -41,10 +41,6 @@ public class CRUDUser extends CRUD<User> {
         return super.update(objeto) & indiceIndireto.update(new ParEmailID(objeto.getEmail(), objeto.getID()));
     }
 
-    public boolean updateSenha(User objeto) throws Exception {
-        return super.update(objeto);
-    }
-
     public ParEmailID search(int hashcode) throws Exception {
         return indiceIndireto.read(hashcode);
     }

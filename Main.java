@@ -9,6 +9,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
+import datastructures.ListaInvertida;
+import java.util.Comparator;
 
 class Clear {
     public static void main(String... arg) throws Exception, InterruptedException {
@@ -19,6 +21,15 @@ class Clear {
             System.out.flush();
             Runtime.getRuntime().exec("clear");
         }
+    }
+}
+
+class GradeSorter implements Comparator<Question>{
+    @Override
+    public int compare(Question o1, Question o2) {
+        if(o1.getGrade() == o2.getGrade())
+            return 0;
+        return o1.getGrade() > o2.getGrade() ? -1 : 1;
     }
 }
 
@@ -50,15 +61,48 @@ public class Main {
         return pattern.matcher(nfdNormalizedString).replaceAll("");
     }
 
+    static int[] intersectionArray(int[] arrayA, int[] arrayB){
+        ArrayList<Integer> arrList = new ArrayList<Integer>();
+        for(int i = 0; i < arrayA.length; i++){
+            for(int j = 0; j < arrayB.length; j++){
+                if(arrayA[i] == arrayB[j]){
+                    arrList.add(arrayA[i]);
+                    j = arrayB.length;
+                }
+            }
+        }
+        int[] arrayC = new int[arrList.size()];
+        for(int i = 0; i < arrayC.length; i++){
+            arrayC[i] = arrList.get(i);
+        }
+        return arrayC;
+    }
+
+    static void printFormattedQuestion(Question tempQuestion, User tempUser){
+        System.out.println("Pergunta: " + tempQuestion.getQuestion());
+        System.out.print("Criada em " + getDateString(tempQuestion.getCreation(), formatter, zone));
+        System.out.println(" por " + tempUser.getName());
+        System.out.println("Palavras chave: " + tempQuestion.getKeyWords());
+        System.out.println("Nota: " + tempQuestion.getGrade());
+    }
+
+    public static void printFormattedAnswer(Answer tempAnswer, User tempUser) {
+        System.out.println("Resposta: " + tempAnswer.getAnswer());
+        System.out.print("Criada em " + getDateString(tempAnswer.getCreation(), formatter, zone));
+        System.out.println(" por " + tempUser.getName());
+        System.out.println("Nota: " + tempAnswer.getGrade());
+    }
+
     public static void telaPrincipal(User user) throws Exception {
         int option1, option2, option3 = 0;
         int count = 0;
         int choice = 0;
-        String userquestion, keywords, confirmCreation = "";
+        String userquestion, keywords, confirmCreation, userAnswer = "";
         IDUSER = user.getID(); // Get the ID of the user and assign to a global variable
         
         try {
             CRUDQuestion question = new CRUDQuestion("questions");
+            CRUDAnswer answer = new CRUDAnswer("answers");
 
             do {
                 Clear.main();
@@ -360,7 +404,172 @@ public class Main {
                     } break;
     
                     case 2: {
+                        choice = 0;
+                        count = 0;
+                        String[] keyWordsArray;
+                        int[] answerSet;
+                        int[] tempSet;
+                        ListaInvertida listaInvertida = new ListaInvertida(4, "dados/dicionario.listainv.db", "dados/blocos.listainv.db");
+                        ArrayList<Question> questionsArray = new ArrayList<Question>();
+                        Question tempQuestion;
+                        CRUDUser tempCrudUser = new CRUDUser("pessoas");
+                        User tempUser;
                         
+                        Clear.main();
+                        System.out.println("\n======================================================");
+                        System.out.println("BEM-VINDO AO SISTEMA PRINCIPAL " + user.getName() + "");
+                        System.out.println("=======================================================\n");
+                        System.out.println("INICIO > BUSCA\n");
+                        System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula");
+                        System.out.println("Ex: política;Brasil;eleições");
+                        System.out.print("\nPalavras chave: ");
+
+                        keywords = removeAccents(scanner.nextLine()).trim();
+                        keyWordsArray = keywords.split(";");
+                        answerSet = listaInvertida.read(keyWordsArray[0]);
+                        
+                        for(int i = 1; i < keyWordsArray.length; i++){
+                            tempSet = listaInvertida.read(keyWordsArray[i]);
+                            answerSet = intersectionArray(answerSet, tempSet);
+                        }
+
+                        for(int i = 0; i < answerSet.length; i++){
+                            tempQuestion = question.read(answerSet[i]);
+                            if (tempQuestion.getActive()) {
+                                questionsArray.add(tempQuestion);
+                            }
+                        }
+                        questionsArray.sort(new GradeSorter());
+
+
+                        Clear.main();
+                        System.out.println("PERGUNTAS ENCONTRADAS\n");
+                        System.out.print("PALAVRAS CHAVE:");
+                        for (String a : keyWordsArray) System.out.print(" "+a+";");
+                        System.out.println("\n");
+
+                        if(questionsArray.size() > 0){
+                            for(int i = 0; i < questionsArray.size(); i++){
+                                tempQuestion = questionsArray.get(i);
+                                tempUser = tempCrudUser.read(tempQuestion.getIDUser());
+                                count++;
+                                System.out.println((i + 1));
+                                printFormattedQuestion(tempQuestion, tempUser);
+                                System.out.println("");
+                            }
+                            do{
+                                System.out.println("Que pergunta deseja visualizar (0 para voltar)?");
+                                choice = Integer.parseInt(scanner.nextLine());
+                            }while(choice > count);
+                        }else{
+                            System.out.println("Nenhuma pergunta encontrada.\n");
+                            waitEnter();
+                        }
+                        
+                        if(choice != 0){
+                            Clear.main();
+                            System.out.println("PERGUNTA "+choice);
+                            System.out.println("=============\n");
+                            System.out.println("INICIO > BUSCA > PERGUNTA SELECIONADA\n");
+                            tempQuestion = questionsArray.get(choice-1);
+                            tempUser = tempCrudUser.read(tempQuestion.getIDUser());
+                            printFormattedQuestion(tempQuestion, tempUser);
+                            System.out.println("\n");
+                            System.out.println("RESPOSTAS");
+                            System.out.println("---------");
+                            
+                            System.out.println("1");
+                            waitEnter();
+
+                            ArrayList<ParIDQuestionIDAnswer> lista = answer.listQuestion(tempQuestion.getID());
+
+                            for (int i = 0; i < lista.size(); i++) {
+                                System.out.println("question: " + lista.get(i).getIDQuestion());
+                                System.out.println("answer: " + lista.get(i).getIDAnswer());
+                            }
+
+                            System.out.println("2");
+                            waitEnter();
+
+                            for (int i = 0; i < lista.size(); i++) {
+                                System.out.println("3");
+                                waitEnter();
+
+                                Answer temp = answer.read(lista.get(i).getIDAnswer());
+                                System.out.println("RESPOSTAAA = " + temp.getAnswer());
+
+                                System.out.println("4");
+                                waitEnter();
+                                
+                                System.out.println(i + 1 + ".");
+                                printFormattedAnswer(temp, tempUser);
+                            }
+
+                            System.out.println("6");
+                            waitEnter();
+
+                            do{
+                                System.out.println("1) Responder");
+                                System.out.println("2) Avaliar a pergunta");
+                                System.out.println("3) Avaliar uma resposta\n");
+                                System.out.println("0) Retornar\n");
+                                System.out.println("Opção: ");
+
+                                try{
+                                    option3 = Integer.valueOf(scanner.nextLine());
+                                }catch(NumberFormatException e){
+                                    option3 = -1;
+                                }
+        
+                                switch(option3){
+                                    case 0:{
+                                        System.out.println("\nVoltando ao inicio.");
+                                        waitEnter();
+                                    }break;
+        
+                                    case 1:{
+                                        Clear.main();
+                                        System.out.println("PERGUNTA "+choice);
+                                        System.out.println("=============\n");
+                                        System.out.println("INICIO > BUSCA > PERGUNTA SELECIONADA > RESPOSTA\n");
+
+                                        printFormattedQuestion(tempQuestion, tempUser);
+
+                                        System.out.print("\nResposta: ");
+                                        userAnswer = scanner.nextLine();
+                                        System.out.println("Sua resposta: " + userAnswer);
+                                        LocalDateTime now = LocalDateTime.now();
+                                        String nowFormatted = now.format(formatter);
+                                        long milli = getMillis(nowFormatted, formatter, zone);   
+
+                                        Answer resp = new Answer(tempQuestion.getID(), tempUser.getID(), milli, userAnswer);
+                                        answer.create(resp);
+                                        
+                                        waitEnter();
+                                    }break;
+        
+                                    case 2:{
+
+                                      //#############################################################
+                                      //####    ADICIONAR A OPÇÃO DE AVALIAR À PERGUNTA AQUI.    ####
+                                      //#############################################################
+                                      
+                                    }break;
+        
+                                    case 3:{
+
+                                      //###############################################################
+                                      //####    ADICIONAR A OPÇÃO DE AVALIAR UMA RESPOSTA AQUI.    ####
+                                      //###############################################################
+                                      
+                                    }break;
+
+                                    default:
+                                        System.out.println("Opcao invalida.");
+                                        waitEnter();
+                                }
+                            } while (option3 != 0);
+                        }
                     } break;
     
                     default:
@@ -621,7 +830,7 @@ public class Main {
                                             usuario.setPassword(password);
                                             System.out.println("\nCadastro de nova senha efetuado com sucesso.\n");
                                             passwordIsTheSame = false;
-                                            user.updateSenha(usuario);
+                                            user.update(usuario);
                                             waitEnter();
                                         }
                                     } while (passwordIsTheSame);

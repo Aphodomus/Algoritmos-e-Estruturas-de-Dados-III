@@ -28,7 +28,6 @@ public class CRUD<T extends Register> {
         
         extendableHash = new HashExtensivel<>(ParIDEndereco.class.getConstructor(), 4, "dados/" + filename + ".hash_d.db", "dados/" + filename + ".hash_c.db");
 
-
         this.constructor = constructor;
         this.raf = new RandomAccessFile("dados/" + filename + "/arquivo.db", "rw");
 
