@@ -33,7 +33,6 @@ public class CRUDQuestion extends CRUD<Question> {
 
     public int create(int IDUser, Question objeto) throws Exception {
         int IDQuestion = super.create(objeto);
-        objeto.setID(IDQuestion);
         arvore.create(new ParIDUserIDQuestion(IDUser, IDQuestion));
 
         String[] strip = objeto.getKeyWords().split(" ");
@@ -71,7 +70,7 @@ public class CRUDQuestion extends CRUD<Question> {
             return 1;
         } catch (Exception e) {
             e.printStackTrace();
-            return -1;
+            return 0;
         }
     }
 }

@@ -420,8 +420,8 @@ public class Main {
                         System.out.println("BEM-VINDO AO SISTEMA PRINCIPAL " + user.getName() + "");
                         System.out.println("=======================================================\n");
                         System.out.println("INICIO > BUSCA\n");
-                        System.out.println("Busque as perguntas por palavra chave separadas por ponto e vírgula");
-                        System.out.println("Ex: política;Brasil;eleições");
+                        System.out.println("Busque as perguntas por palavra chave separadas por ponto e virgula");
+                        System.out.println("Ex: politica;Brasil;eleicoes");
                         System.out.print("\nPalavras chave: ");
 
                         keywords = removeAccents(scanner.nextLine()).trim();
@@ -488,32 +488,19 @@ public class Main {
                                 System.out.println("answer: " + lista.get(i).getIDAnswer());
                             }
 
-                            System.out.println("2");
-                            waitEnter();
-
                             for (int i = 0; i < lista.size(); i++) {
-                                System.out.println("3");
-                                waitEnter();
-
                                 Answer temp = answer.read(lista.get(i).getIDAnswer());
-                                System.out.println("RESPOSTAAA = " + temp.getAnswer());
-
-                                System.out.println("4");
-                                waitEnter();
                                 
                                 System.out.println(i + 1 + ".");
                                 printFormattedAnswer(temp, tempUser);
                             }
-
-                            System.out.println("6");
-                            waitEnter();
 
                             do{
                                 System.out.println("1) Responder");
                                 System.out.println("2) Avaliar a pergunta");
                                 System.out.println("3) Avaliar uma resposta\n");
                                 System.out.println("0) Retornar\n");
-                                System.out.println("Opção: ");
+                                System.out.println("Opcao: ");
 
                                 try{
                                     option3 = Integer.valueOf(scanner.nextLine());

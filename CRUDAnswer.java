@@ -29,17 +29,19 @@ public class CRUDAnswer extends CRUD<Answer> {
 
     // Functions and methods
     public ArrayList<ParIDQuestionIDAnswer> listQuestion (int idQuestion) throws Exception{
-        System.out.println("entrou no ListQuestion");
-        System.out.println("Valor IDQuestion = " + idQuestion);
+        //System.out.println("idquestion: " + idQuestion);
         ArrayList<ParIDQuestionIDAnswer> lista = arvore.read(new ParIDQuestionIDAnswer(idQuestion, -1));
-        System.out.println("Tamhno da ListaQuestion = " + lista.size());
+        //System.out.println(lista);
+        //System.out.println("SAIUUUUUUU");
         return lista;
     }
 
     public int create(Answer objeto) throws Exception {
         int IDAnswer = super.create(objeto);
         objeto.setIDAnswer(IDAnswer);
-        System.out.println("IDAnswer = " + objeto.getIDAnswer());
+        //System.out.println("idquestion: " + objeto.getIDQuestion());
+        //System.out.println("idanswer: " + objeto.getIDAnswer());
+        //System.out.println("iduser: " + objeto.getIDUser());
         arvore.create(new ParIDQuestionIDAnswer(objeto.getIDQuestion(), objeto.getIDAnswer()));
         arvore2.create(new ParIDUserIDAnswer(objeto.getIDUser(), objeto.getIDAnswer()));
 
@@ -48,16 +50,12 @@ public class CRUDAnswer extends CRUD<Answer> {
 
     public Answer read(int id) throws Exception {
         Answer q = new Answer();
-        System.out.println("9");
 
         try {
-            System.out.println("10");
             q = super.read(id);
-            System.out.println("11");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("12");
 
         return q;
     }
